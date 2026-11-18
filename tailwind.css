@@ -1,0 +1,173 @@
+@import 'tailwindcss';
+@source "./src";
+
+/* static: 强制输出全部主题变量。v4 默认 tree-shake 未使用的变量，
+ * 但这些变量会被 global.less(Less 管线)及组件内联 var() 引用，
+ * Tailwind 扫描不到那些引用，必须全量输出，否则浏览器报变量未定义 */
+@theme static {
+  /* ===== antd 语义色映射（对应 antd 默认 light 主题 token）===== */
+
+  /* 语义状态色 */
+  --color-success: #52c41a;
+  --color-warning: #faad14;
+  --color-error: #ff4d4f;
+
+  /* 文本色 */
+  --color-text: rgba(0, 0, 0, 88%);
+  --color-text-secondary: rgba(0, 0, 0, 65%);
+  --color-text-description: rgba(0, 0, 0, 45%);
+  --color-text-heading: rgba(0, 0, 0, 88%);
+
+  /* 背景 / 边框 / 分割线 */
+  --color-bg-container: #fff;
+  --color-border-secondary: #f0f0f0;
+  --color-split: #f0f0f0;
+  --color-fill-secondary: rgba(0, 0, 0, 6%);
+  --color-fill-tertiary: rgba(0, 0, 0, 4%);
+  --color-fill-quaternary: rgba(0, 0, 0, 2%);
+
+  /* ===== 圆角体系对齐 antd v6 token（基准 6px，px，勿用 rem）=====
+   * 与 config.ts 的 theme.token.borderRadius: 6 联动，antd 派生：SM=4/XS=2/LG=8/Outer=4
+   * rounded       6px ↔ token.borderRadius    控件标准圆角（Button/Input/Select/Segmented 外壳）
+   * rounded-sm    4px ↔ token.borderRadiusSM  小元素（Tag/Checkbox/Segmented item）
+   * rounded-xs    2px ↔ token.borderRadiusXS  超小元素
+   * rounded-lg    8px ↔ token.borderRadiusLG  大容器（Card/Modal/Alert）
+   * rounded-md    6px（= borderRadius，防止 md 档与基准倒挂）
+   * rounded-xl    8px（antd v6 已移除 borderRadiusXL，此档对齐 LG） */
+  --radius: 6px;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 8px;
+
+  /* ===== 业务 primary 色阶（紫色 #7B5BEC）===== */
+  --color-primary-50: #f4f2fe;
+  --color-primary-100: #e7e2fc;
+  --color-primary-200: #cdc2f7;
+  --color-primary-300: #b09df3;
+  --color-primary-400: #9379ef;
+  --color-primary-500: #7b5bec;
+
+  /* primary */
+  --color-primary-600: #674cc6;
+  --color-primary-700: #5640a5;
+  --color-primary-800: #47358a;
+  --color-primary-900: #372b6a;
+  --color-primary-950: #1f173b;
+}
+
+/* ===== model-order 筛选项 CheckableTag 主题化 =====
+ * 双类选择器提升优先级，压过 antd cssinjs 运行时插入的同名规则
+ * filter-checkable-pills：模型选择弹窗左侧筛选复用同一套胶囊样式（仅胶囊，无容器阴影/虚线） */
+.filter-checkable-tags {
+  box-shadow: 0 6px 20px rgba(123, 91, 236, 7%);
+}
+
+.filter-checkable-tags > div:not(:last-of-type) {
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--color-fill-secondary);
+}
+
+:is(.filter-checkable-tags, .filter-checkable-pills)
+  .ant-tag-checkable.ant-tag-checkable {
+  border-radius: 16px;
+  padding: 2px 12px;
+  background: var(--color-gray-100);
+  color: var(--color-text-secondary);
+  transition: color var(--ant-motion-duration-mid),
+    background var(--ant-motion-duration-mid);
+}
+
+:is(.filter-checkable-tags, .filter-checkable-pills)
+  .ant-tag-checkable.ant-tag-checkable:hover {
+  background: var(--color-fill-secondary);
+  color: var(--color-text);
+}
+
+:is(.filter-checkable-tags, .filter-checkable-pills)
+  .ant-tag-checkable-checked.ant-tag-checkable-checked,
+:is(.filter-checkable-tags, .filter-checkable-pills)
+  .ant-tag-checkable-checked.ant-tag-checkable-checked:hover {
+  background: var(--color-primary-500);
+  color: #fff;
+}
+
+/* ===== chatbot 光标闪烁动画 ===== */
+@keyframes chatbot-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ===== RichEditor 编辑区排版 ===== */
+.rich-editor-content {
+  padding: 8px 12px;
+}
+
+.rich-editor-content .ProseMirror {
+  outline: none;
+  min-height: inherit;
+}
+
+/* placeholder */
+.rich-editor-content .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: rgba(0, 0, 0, 25%);
+  pointer-events: none;
+  height: 0;
+}
+
+/* 排版恢复 — !important 确保 font 属性不被 Tailwind preflight 覆盖 */
+.rich-editor-content .ProseMirror h1 {
+  font-size: 1.5em !important;
+  font-weight: 700 !important;
+  margin: 0.5em 0;
+}
+
+.rich-editor-content .ProseMirror h2 {
+  font-size: 1.3em !important;
+  font-weight: 700 !important;
+  margin: 0.5em 0;
+}
+
+.rich-editor-content .ProseMirror p {
+  margin: 0.3em 0;
+}
+
+.rich-editor-content .ProseMirror ul {
+  list-style: disc;
+  padding-left: 1.5em;
+  margin: 0.3em 0;
+}
+
+.rich-editor-content .ProseMirror ol {
+  list-style: decimal;
+  padding-left: 1.5em;
+  margin: 0.3em 0;
+}
+
+.rich-editor-content .ProseMirror a {
+  color: var(--color-primary-500);
+  text-decoration: underline;
+}
+
+.rich-editor-content .ProseMirror blockquote {
+  border-left: 3px solid #d9d9d9;
+  padding-left: 1em;
+  color: rgba(0, 0, 0, 45%);
+  margin: 0.5em 0;
+}
+
+.rich-editor-content .ProseMirror code {
+  background: rgba(0, 0, 0, 6%);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}

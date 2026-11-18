@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "life-ai-backend-context": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${workspaceFolder}/.mcp/backend-api/dist/server.js"]
+    }
+  }
+}
