@@ -4,6 +4,11 @@
       "type": "stdio",
       "command": "node",
       "args": ["${workspaceFolder}/.mcp/backend-api/dist/server.js"]
+    },
+    "life-ai-openapi-context": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${workspaceFolder}/.mcp/openapi-context/dist/server.js"]
     }
   }
 }
