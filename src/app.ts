@@ -1,48 +1,62 @@
 // 运行时配置
+import { clearAuthSession, getAccessToken, getStoredUser } from '@/utils/auth';
+import { history } from '@umijs/max';
+import { message } from 'antd';
 
-// 全局初始化数据配置，用于 Layout 用户信息和权限初始化
-// 更多信息见文档：https://umijs.org/docs/api/runtime-config#getinitialstate
-export async function getInitialState(): Promise<{ name: string }> {
+export async function getInitialState() {
+  const user = getStoredUser();
   return {
-    name: '@umijs/max',
-    // antd: {
-    //   appConfig: {},
-    //   configProvider: {
-    //     variant: 'outlined',
-    //     theme: {
-    //       token: {
-    //         colorPrimary: '#7B5BEC',
-    //         colorLink: '#7B5BEC',
-    //         fontFamily: 'AlibabaSans, sans-serif',
-    //         // 全局默认圆角基准，派生规则见 antd genRadius：SM=4/XS=2/LG=8/Outer=4；
-    //         // tailwind.css 的 --radius-* 体系已同步对齐，两套圆角保持一致
-    //         borderRadius: 6,
-    //       },
-    //       components: {
-    //         Table: {
-    //           headerBg: '#f4f2fe', // 表头背景色
-    //           headerColor: '#666', // 表头文字颜色
-    //         },
-    //         Tooltip: {
-    //           // 全局白底气泡（含箭头）；文字色仅 Tooltip 生效，不影响 Button/Badge 等 colorTextLightSolid 使用方
-    //           colorBgSpotlight: '#fff',
-    //           colorTextLightSolid: 'rgba(0, 0, 0, 0.88)',
-    //           // 白底气泡上默认阴影（最高 12% 透明度）视觉不可见，仅对 Tooltip 加深投影
-    //           dropShadowPopover:
-    //             'drop-shadow(0 6px 16px rgba(0, 0, 0, 0.12)) drop-shadow(0 3px 6px rgba(0, 0, 0, 0.16)) drop-shadow(0 9px 28px rgba(0, 0, 0, 0.08))',
-    //         },
-    //       },
-    //     },
-    //   },
-    // },
+    name: user?.displayName || user?.email || '@umijs/max',
+    currentUser: user,
   };
 }
 
-export const layout = () => {
-  return {
-    logo: 'https://img.alicdn.com/tfs/TB1YHEpwUT1gK0jSZFhXXaAtVXa-28-27.svg',
-    menu: {
-      locale: false,
+export const layout = () => ({
+  logo: 'https://img.alicdn.com/tfs/TB1YHEpwUT1gK0jSZFhXXaAtVXa-28-27.svg',
+  menu: { locale: false },
+  onPageChange: () => {
+    const publicPaths = ['/login', '/verify-email'];
+    if (!getAccessToken() && !publicPaths.includes(history.location.pathname)) {
+      const redirect = `${history.location.pathname}${history.location.search}`;
+      history.replace(`/login?redirect=${encodeURIComponent(redirect)}`);
+    }
+  },
+});
+
+export const request = {
+  requestInterceptors: [
+    (url: string, options: RequestInit) => {
+      const token = getAccessToken();
+      if (!token) return { url, options };
+      return {
+        url,
+        options: {
+          ...options,
+          headers: {
+            ...options.headers,
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      };
     },
-  };
+  ],
+  errorConfig: {
+    errorHandler: (error: {
+      response?: Response;
+      data?: { message?: string };
+      message?: string;
+    }) => {
+      const status = error.response?.status;
+      if (status === 401 || status === 403) {
+        clearAuthSession();
+        const pathname = history.location.pathname;
+        if (pathname !== '/login' && pathname !== '/verify-email') {
+          message.warning('登录状态已失效，请重新登录');
+          const redirect = `${pathname}${history.location.search}`;
+          history.replace(`/login?redirect=${encodeURIComponent(redirect)}`);
+        }
+      }
+      throw error;
+    },
+  },
 };

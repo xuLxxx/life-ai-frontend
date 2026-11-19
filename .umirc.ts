@@ -6,6 +6,16 @@ export default defineConfig({
   model: {},
   initialState: {},
   request: {},
+  proxy: {
+    '/auth': {
+      target: 'http://127.0.0.1:3000',
+      changeOrigin: true,
+    },
+    '/profile': {
+      target: 'http://127.0.0.1:3000',
+      changeOrigin: true,
+    },
+  },
   reactQuery: {
     queryClient: {
       defaultOptions: {
@@ -20,6 +30,16 @@ export default defineConfig({
     title: '@umijs/max',
   },
   routes: [
+    {
+      path: '/login',
+      component: './Login',
+      layout: false,
+    },
+    {
+      path: '/verify-email',
+      component: './VerifyEmail',
+      layout: false,
+    },
     {
       path: '/',
       redirect: '/home',

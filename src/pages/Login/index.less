@@ -1,0 +1,102 @@
+.page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(420px, 0.9fr);
+  align-items: center;
+  gap: clamp(40px, 8vw, 120px);
+  padding: clamp(32px, 6vw, 96px);
+  background: radial-gradient(
+      circle at 12% 12%,
+      rgb(123 91 236 / 28%),
+      transparent 28%
+    ),
+    radial-gradient(circle at 88% 88%, rgb(86 64 165 / 18%), transparent 30%),
+    #f7f6fc;
+}
+
+.brand {
+  max-width: 560px;
+  color: var(--color-text-heading);
+}
+
+.brandLogo {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 28px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #9379ef, #5640a5);
+  box-shadow: 0 18px 40px rgb(86 64 165 / 25%);
+  color: #fff;
+  font-size: 32px;
+}
+
+.brandTitle {
+  margin: 0 0 16px !important;
+  font-size: clamp(42px, 5vw, 72px) !important;
+  letter-spacing: -0.04em;
+}
+
+.brandCopy {
+  color: var(--color-text-secondary) !important;
+  font-size: clamp(16px, 1.5vw, 20px);
+  line-height: 1.8 !important;
+}
+
+.card {
+  width: min(100%, 480px);
+  justify-self: center;
+  padding: clamp(28px, 4vw, 46px);
+  border: 1px solid rgb(255 255 255 / 80%);
+  border-radius: 24px;
+  background: rgb(255 255 255 / 92%);
+  box-shadow: 0 30px 80px rgb(55 43 106 / 12%);
+  backdrop-filter: blur(20px);
+}
+
+.cardHeader {
+  margin-bottom: 24px;
+  text-align: center;
+
+  h2 {
+    margin-bottom: 8px;
+    color: var(--color-text-heading);
+  }
+}
+
+.form {
+  margin-top: 8px;
+}
+
+.submit {
+  height: 48px;
+  margin-top: 8px;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgb(123 91 236 / 24%);
+}
+
+@media (max-width: 860px) {
+  .page {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 32px 20px;
+  }
+
+  .brand {
+    justify-self: center;
+    text-align: center;
+  }
+
+  .brandLogo {
+    margin-inline: auto;
+  }
+
+  .brandTitle {
+    font-size: 42px !important;
+  }
+
+  .brandCopy {
+    display: none;
+  }
+}
