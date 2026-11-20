@@ -1,11 +1,12 @@
 import { signIn, signUp } from '@/services/auth';
+import { getCurrentUser } from '@/services/profile';
 import {
   getAccessToken,
   saveAuthResponse,
   saveVerificationEmail,
 } from '@/utils/auth';
 import { LockOutlined, MailOutlined, RobotOutlined } from '@ant-design/icons';
-import { history, useSearchParams } from '@umijs/max';
+import { history, useModel, useSearchParams } from '@umijs/max';
 import { App, Button, Form, Input, Tabs, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import CheckEmail from './components/CheckEmail';
@@ -33,18 +34,25 @@ const LoginPage: React.FC = () => {
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   const { message } = App.useApp();
+  const { initialState, setInitialState } = useModel('@@initialState');
 
   useEffect(() => {
-    if (getAccessToken()) history.replace('/');
-  }, []);
+    if (initialState?.currentUser && getAccessToken()) history.replace('/');
+  }, [initialState?.currentUser]);
 
   const submitLogin = async (values: LoginFormValues) => {
     setSubmitting(true);
     try {
       const response = await signIn(values);
-      if (!saveAuthResponse(response)) {
+      const user = saveAuthResponse(response);
+      if (!getAccessToken()) {
         throw new Error('登录成功，但服务未返回访问令牌');
       }
+      const currentUser = user ?? (await getCurrentUser());
+      await setInitialState({
+        currentUser,
+        name: currentUser.displayName || currentUser.email || values.email,
+      });
       message.success('登录成功');
       history.replace(searchParams.get('redirect') || '/');
     } catch (error) {
@@ -56,12 +64,6 @@ const LoginPage: React.FC = () => {
       if (currentError.response?.status === 403) {
         saveVerificationEmail(values.email);
         history.push(`/verify-email?email=${encodeURIComponent(values.email)}`);
-      } else {
-        message.error(
-          currentError.data?.message ||
-            currentError.message ||
-            '登录失败，请检查邮箱和密码',
-        );
       }
     } finally {
       setSubmitting(false);
@@ -79,16 +81,8 @@ const LoginPage: React.FC = () => {
       saveVerificationEmail(values.email);
       setRegisteredEmail(values.email);
       message.success('注册成功，请检查邮箱');
-    } catch (error) {
-      const currentError = error as {
-        data?: { message?: string };
-        message?: string;
-      };
-      message.error(
-        currentError.data?.message ||
-          currentError.message ||
-          '注册失败，请稍后重试',
-      );
+    } catch {
+      // 请求错误由全局 requestErrorConfig 展示。
     } finally {
       setSubmitting(false);
     }

@@ -12,6 +12,8 @@
 6. MCP 只能读取 `.mcp/backend-api/.env` 中 `BACKEND_ROOT` 指定的后端仓库；不得读取或暴露 `.env`、密钥、token、`node_modules` 或构建产物。
 7. OpenAPI MCP 只读取预配置的数据源，不接受任意 URL，也不转发认证凭据或调用业务接口。
 8. 生成前端类型、服务方法和请求实现时，以 OpenAPI 契约和后端实际源码为准，并注明来源接口或文件。
+9. 后端统一返回 `{ code, message, success, data }`：`success === true` 时业务处理成功，拦截器解包并向服务层返回 `data`；`success === false` 时按失败处理，统一显示后端 `message` 并拒绝请求。
+10. HTTP 业务接口中的鉴权判断同时参考 HTTP 状态和响应 `code`；`code` 为 401 时按未授权处理并尝试刷新 Token，其他业务失败不得因仅有 `code` 非零而覆盖 `success` 判断。
 
 ## 页面样式约束
 

@@ -1,14 +1,16 @@
 import Guide from '@/components/Guide';
-import { trim } from '@/utils/format';
 import { PageContainer } from '@ant-design/pro-components';
 import { useModel } from '@umijs/max';
 
 const HomePage: React.FC = () => {
-  const { name } = useModel('global');
+  const { initialState } = useModel('@@initialState');
+  const name =
+    initialState?.currentUser?.displayName || initialState?.name || '';
+
   return (
     <PageContainer ghost>
       <div className="pt-20">
-        <Guide name={trim(name)} />
+        <Guide name={name} />
       </div>
     </PageContainer>
   );

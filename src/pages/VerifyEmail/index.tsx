@@ -54,14 +54,7 @@ const VerifyEmailPage: React.FC = () => {
       await resendVerification(email.trim());
       setCountdown(60);
       message.success('验证邮件已重新发送，请检查收件箱');
-    } catch (error) {
-      const currentError = error as {
-        data?: { message?: string };
-        message?: string;
-      };
-      message.error(
-        currentError.data?.message || currentError.message || '邮件发送失败',
-      );
+    } catch {
     } finally {
       setSending(false);
     }

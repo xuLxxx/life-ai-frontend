@@ -23,7 +23,15 @@ export async function signIn(data: SignInPayload) {
   return request('/auth/sign-in', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     data,
+  });
+}
+
+export async function refreshAccessToken() {
+  return request('/auth/refresh-token', {
+    method: 'POST',
+    credentials: 'include',
   });
 }
 

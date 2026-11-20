@@ -1,7 +1,9 @@
 import type { history } from '@umijs/max';
 
-const ACCESS_TOKEN_KEY = 'life_ai_access_token';
-const AUTH_USER_KEY = 'life_ai_user';
+const LEGACY_ACCESS_TOKEN_KEY = 'life_ai_access_token';
+const LEGACY_AUTH_USER_KEY = 'life_ai_auth_user';
+let accessToken: string | null = null;
+let refreshPromise: Promise<boolean> | null = null;
 
 export type AuthUser = {
   id?: string;
@@ -11,18 +13,7 @@ export type AuthUser = {
 };
 
 export function getAccessToken(): string | null {
-  return localStorage.getItem(ACCESS_TOKEN_KEY);
-}
-
-export function getStoredUser(): AuthUser | null {
-  const value = localStorage.getItem(AUTH_USER_KEY);
-  if (!value) return null;
-  try {
-    return JSON.parse(value) as AuthUser;
-  } catch {
-    localStorage.removeItem(AUTH_USER_KEY);
-    return null;
-  }
+  return accessToken;
 }
 
 function findToken(value: unknown, depth = 0): string | undefined {
@@ -46,29 +37,76 @@ function findUser(value: unknown, depth = 0): AuthUser | null {
   if (record.user && typeof record.user === 'object') {
     return record.user as AuthUser;
   }
+  const user: AuthUser = {};
+  for (const key of ['id', 'email', 'displayName']) {
+    if (key in record) user[key] = record[key];
+  }
+  if (Object.keys(user).length > 0) return user;
   for (const key of ['session', 'data', 'result']) {
-    const user = findUser(record[key], depth + 1);
-    if (user) return user;
+    const nestedUser = findUser(record[key], depth + 1);
+    if (nestedUser) return nestedUser;
   }
   return null;
 }
 
-export function saveAuthResponse(value: unknown): boolean {
+export function saveAuthResponse(value: unknown): AuthUser | null {
   const token = findToken(value);
-  if (!token) return false;
-  localStorage.setItem(ACCESS_TOKEN_KEY, token);
-  const user = findUser(value);
-  if (user) localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
-  return true;
+  if (!token) return null;
+  accessToken = token;
+  localStorage.removeItem(LEGACY_ACCESS_TOKEN_KEY);
+  localStorage.removeItem(LEGACY_AUTH_USER_KEY);
+  return findUser(value);
 }
 
 export function saveAccessToken(token: string): void {
-  localStorage.setItem(ACCESS_TOKEN_KEY, token);
+  accessToken = token;
+  localStorage.removeItem(LEGACY_ACCESS_TOKEN_KEY);
 }
 
 export function clearAuthSession(): void {
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
-  localStorage.removeItem(AUTH_USER_KEY);
+  accessToken = null;
+  localStorage.removeItem(LEGACY_ACCESS_TOKEN_KEY);
+}
+
+function isTokenExpiringSoon(token: string): boolean {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return false;
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const decoded = JSON.parse(atob(normalized)) as { exp?: number };
+    return Boolean(decoded.exp && decoded.exp * 1000 <= Date.now() + 30_000);
+  } catch {
+    return false;
+  }
+}
+
+export async function refreshAccessTokenFromCookie(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    try {
+      const response = await fetch('/auth/refresh-token', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { Accept: 'application/json' },
+      });
+      if (!response.ok) return false;
+      saveAuthResponse(await response.json());
+      return Boolean(accessToken);
+    } catch {
+      return false;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
+export async function ensureAccessToken(): Promise<string | null> {
+  if (accessToken && !isTokenExpiringSoon(accessToken)) return accessToken;
+  await refreshAccessTokenFromCookie();
+  return accessToken;
 }
 
 export function saveVerificationEmail(email: string): void {
