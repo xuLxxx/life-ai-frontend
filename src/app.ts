@@ -1,6 +1,8 @@
 // 运行时配置
 
 import { getRequestInstance, history } from '@umijs/max';
+import { createElement } from 'react';
+import UserAvatarMenu from '@/components/UserAvatarMenu';
 import { getCurrentUser } from '@/services/profile';
 import {
   ensureAccessToken,
@@ -28,6 +30,11 @@ export async function getInitialState() {
 export const layout = () => ({
   logo: 'https://img.alicdn.com/tfs/TB1YHEpwUT1gK0jSZFhXXaAtVXa-28-27.svg',
   menu: { locale: false },
+  avatarProps: {
+    title: '个人账户',
+    render: (_props: unknown, dom: React.ReactNode) =>
+      createElement(UserAvatarMenu, null, dom),
+  },
   onPageChange: () => {
     if (
       !getAccessToken() &&

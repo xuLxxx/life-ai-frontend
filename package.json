@@ -4,7 +4,7 @@
   "scripts": {
     "build": "max build",
     "copy:monaco": "node scripts/copy-monaco.cjs",
-    "dev": "max dev",
+    "dev": "max dev --port 8391",
     "format": "biome check --write .",
     "postinstall": "max setup",
     "prepare": "husky",

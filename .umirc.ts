@@ -54,6 +54,10 @@ export default defineConfig({
       target: 'http://127.0.0.1:3000',
       changeOrigin: true,
     },
+    '/storage': {
+      target: 'http://127.0.0.1:54321',
+      changeOrigin: true,
+    },
   },
   reactQuery: {
     queryClient: {
@@ -97,6 +101,12 @@ export default defineConfig({
       name: '首页',
       path: '/home',
       component: './Home',
+    },
+    {
+      name: '个人中心',
+      path: '/profile',
+      component: './Profile',
+      hideInMenu: true,
     },
     {
       name: '权限演示',

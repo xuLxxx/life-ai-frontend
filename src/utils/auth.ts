@@ -2,6 +2,7 @@ import type { history } from '@umijs/max';
 
 const LEGACY_ACCESS_TOKEN_KEY = 'life_ai_access_token';
 const LEGACY_AUTH_USER_KEY = 'life_ai_auth_user';
+const LOGGED_OUT_KEY = 'life_ai_logged_out';
 let accessToken: string | null = null;
 let refreshPromise: Promise<boolean> | null = null;
 
@@ -53,6 +54,7 @@ export function saveAuthResponse(value: unknown): AuthUser | null {
   const token = findToken(value);
   if (!token) return null;
   accessToken = token;
+  sessionStorage.removeItem(LOGGED_OUT_KEY);
   localStorage.removeItem(LEGACY_ACCESS_TOKEN_KEY);
   localStorage.removeItem(LEGACY_AUTH_USER_KEY);
   return findUser(value);
@@ -60,11 +62,13 @@ export function saveAuthResponse(value: unknown): AuthUser | null {
 
 export function saveAccessToken(token: string): void {
   accessToken = token;
+  sessionStorage.removeItem(LOGGED_OUT_KEY);
   localStorage.removeItem(LEGACY_ACCESS_TOKEN_KEY);
 }
 
 export function clearAuthSession(): void {
   accessToken = null;
+  sessionStorage.setItem(LOGGED_OUT_KEY, '1');
   localStorage.removeItem(LEGACY_ACCESS_TOKEN_KEY);
 }
 
@@ -105,6 +109,7 @@ export async function refreshAccessTokenFromCookie(): Promise<boolean> {
 
 export async function ensureAccessToken(): Promise<string | null> {
   if (accessToken && !isTokenExpiringSoon(accessToken)) return accessToken;
+  if (sessionStorage.getItem(LOGGED_OUT_KEY) === '1') return null;
   await refreshAccessTokenFromCookie();
   return accessToken;
 }
