@@ -39,9 +39,6 @@ importers:
       prettier:
         specifier: ^2.8.7
         version: 2.8.8
-      prettier-plugin-organize-imports:
-        specifier: ^3.2.2
-        version: 3.2.4(prettier@2.8.8)(typescript@5.9.3)
       prettier-plugin-packagejson:
         specifier: ^2.4.3
         version: 2.5.22(prettier@2.8.8)

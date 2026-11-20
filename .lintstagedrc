@@ -2,16 +2,11 @@
   "*.{md,json}": [
     "prettier --cache --write"
   ],
-  "*.{js,jsx}": [
-    "max lint --fix --eslint-only",
-    "prettier --cache --write"
+  "*.{js,jsx,ts,tsx}": [
+    "biome check --write --no-errors-on-unmatched"
   ],
   "*.{css,less}": [
     "max lint --fix --stylelint-only",
     "prettier --cache --write"
-  ],
-  "*.ts?(x)": [
-    "max lint --fix --eslint-only",
-    "prettier --cache --parser=typescript --write"
   ]
 }
